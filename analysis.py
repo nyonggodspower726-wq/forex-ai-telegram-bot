@@ -15,4 +15,4 @@ def analyze_market(symbol):
     response = requests.get(url)
     data = response.json()
 
-    return str(data)
+    return "TESTING NEW STRATEGY FILE"
