@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "aba787bf68ba4008b359f34229fdbc29"
+API_KEY = "YOUR_TWELVE_DATA_KEY"
 
 
 def get_candles(symbol, interval):
@@ -53,6 +53,38 @@ def detect_mss(candles):
     return "No MSS yet"
 
 
+def detect_engulfing(candles):
+    if len(candles) < 2:
+        return "Not enough data"
+
+    current = candles[0]
+    previous = candles[1]
+
+    current_open = float(current["open"])
+    current_close = float(current["close"])
+
+    previous_open = float(previous["open"])
+    previous_close = float(previous["close"])
+
+    if (
+        previous_close < previous_open
+        and current_close > current_open
+        and current_close > previous_open
+        and current_open < previous_close
+    ):
+        return "Bullish Engulfing 🟢"
+
+    if (
+        previous_close > previous_open
+        and current_close < current_open
+        and current_close < previous_open
+        and current_open > previous_close
+    ):
+        return "Bearish Engulfing 🔴"
+
+    return "No Engulfing yet"
+
+
 def analyze_market(symbol):
 
     symbols = {
@@ -71,6 +103,7 @@ def analyze_market(symbol):
 
     bias = detect_bias(h1)
     mss = detect_mss(m5)
+    engulfing = detect_engulfing(m5)
 
     return f"""
 📊 PipsPilot AI
@@ -82,6 +115,9 @@ Symbol: {symbol}
 
 5M Entry Analysis:
 {mss}
+
+Confirmation:
+{engulfing}
 
 Data connection ✅
 """
