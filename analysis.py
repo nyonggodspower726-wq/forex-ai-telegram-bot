@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "aba787bf68ba4008b359f34229fdbc29"
+API_KEY = "YOUR_TWELVE_DATA_KEY"
 
 
 def get_candles(symbol, interval):
@@ -85,6 +85,25 @@ def detect_engulfing(candles):
     return "No Engulfing yet"
 
 
+def generate_signal(bias, mss, engulfing):
+
+    if (
+        "Bullish" in bias
+        and "Bullish MSS" in mss
+        and "Bullish Engulfing" in engulfing
+    ):
+        return "BUY 🟢"
+
+    if (
+        "Bearish" in bias
+        and "Bearish MSS" in mss
+        and "Bearish Engulfing" in engulfing
+    ):
+        return "SELL 🔴"
+
+    return "WAIT ⏳"
+
+
 def analyze_market(symbol):
 
     symbols = {
@@ -104,7 +123,8 @@ def analyze_market(symbol):
     bias = detect_bias(h1)
     mss = detect_mss(m5)
     engulfing = detect_engulfing(m5)
-signal = generate_signal(bias, mss, engulfing)
+    signal = generate_signal(bias, mss, engulfing)
+
     return f"""
 📊 PipsPilot AI
 
@@ -118,6 +138,9 @@ Symbol: {symbol}
 
 Confirmation:
 {engulfing}
+
+Signal:
+{signal}
 
 Data connection ✅
 """
