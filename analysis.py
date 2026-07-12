@@ -104,7 +104,7 @@ def analyze_market(symbol):
     bias = detect_bias(h1)
     mss = detect_mss(m5)
     engulfing = detect_engulfing(m5)
-
+signal = generate_signal(bias, mss, engulfing)
     return f"""
 📊 PipsPilot AI
 
