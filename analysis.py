@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "aba787bf68ba4008b359f34229fdbc29"
+API_KEY = "YOUR_TWELVE_DATA_KEY"
 
 
 def get_candles(symbol, interval):
@@ -30,6 +30,29 @@ def detect_bias(candles):
         return "Bearish 🔴"
 
 
+def detect_mss(candles):
+    if len(candles) < 5:
+        return "Not enough data"
+
+    recent = candles[:5]
+
+    highs = [float(c["high"]) for c in recent]
+    lows = [float(c["low"]) for c in recent]
+
+    current_close = float(recent[0]["close"])
+
+    previous_high = max(highs[1:])
+    previous_low = min(lows[1:])
+
+    if current_close > previous_high:
+        return "Bullish MSS 🟢"
+
+    if current_close < previous_low:
+        return "Bearish MSS 🔴"
+
+    return "No MSS yet"
+
+
 def analyze_market(symbol):
 
     symbols = {
@@ -43,7 +66,11 @@ def analyze_market(symbol):
     h1 = get_candles(symbol, "1h")
     m5 = get_candles(symbol, "5min")
 
+    if not h1 or not m5:
+        return "❌ Unable to get market data"
+
     bias = detect_bias(h1)
+    mss = detect_mss(m5)
 
     return f"""
 📊 PipsPilot AI
@@ -53,8 +80,8 @@ Symbol: {symbol}
 1H Intraday Bias:
 {bias}
 
-5M Analysis:
-Waiting for MSS + Engulfing confirmation...
+5M Entry Analysis:
+{mss}
 
 Data connection ✅
 """
