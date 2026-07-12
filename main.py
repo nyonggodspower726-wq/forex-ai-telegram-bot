@@ -1,15 +1,15 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-from config import BOT_TOKEN
 from analysis import analyze_market
+
+TOKEN = "YOUR_BOT_TOKEN"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "🤖 PipsPilot AI is Online!\n\n"
-        "Use:\n"
-        "/analysis XAUUSD"
+        "Welcome to PipsPilot AI 📈\n\n"
+        "Use /analysis XAUUSD"
     )
 
 
@@ -20,11 +20,11 @@ async def analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     symbol = context.args[0]
     result = analyze_market(symbol)
-    await update.message.reply_text(result)
+    await update.message.reply_text(str(result))
 
 
 def main():
-    app = Application.builder().token(BOT_TOKEN).build()
+    app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("analysis", analysis))
