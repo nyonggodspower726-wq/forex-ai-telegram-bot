@@ -112,7 +112,7 @@ def detect_mss(candles):
     return "No MSS yet"
 
 
-  def detect_engulfing(candles):
+def detect_engulfing(candles):
 
     if len(candles) < 2:
         return "Not enough data"
@@ -252,7 +252,9 @@ def analyze_market(symbol):
     symbols = {
         "XAUUSD": "XAU/USD",
         "BTCUSD": "BTC/USD",
-        "ETHUSD": "ETH/USD"
+        "ETHUSD": "ETH/USD",
+        "EURUSD": "EUR/USD",
+        "GBPUSD": "GBP/USD"
     }
 
 
