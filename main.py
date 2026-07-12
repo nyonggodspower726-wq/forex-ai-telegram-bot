@@ -1,25 +1,34 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-import asyncio
+from analysis import analyze_market
 
-from strategy import analyze_market
-from scanner import start_scanner
-
-TOKEN = "8858152810:AAGy4KD8Mr8ANSIdFfCH1s40i62jTJRWgGY"
+TOKEN = "PASTE_YOUR_NEW_BOT_TOKEN_HERE"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Welcome to Godspower Trading Bot 📊\n\n"
-        "Your EUR/USD analysis assistant is online.\n"
-        "The market scanner is active.\n"
-        "Use /analysis to check the market."
+        "📊 Welcome to PipsPilot AI\n\n"
+        "Analyze any supported market.\n\n"
+        "Examples:\n"
+        "/analysis XAUUSD\n"
+        "/analysis BTCUSD\n"
+        "/analysis ETHUSD"
     )
 
 
 async def analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    result = analyze_market()
+    if not context.args:
+        await update.message.reply_text(
+            "Usage:\n"
+            "/analysis XAUUSD"
+        )
+        return
+
+    symbol = context.args[0].upper()
+
+    result = analyze_market(symbol)
+
     await update.message.reply_text(result)
 
 
@@ -30,10 +39,6 @@ def main():
     app.add_handler(CommandHandler("analysis", analysis))
 
     print("Bot is running...")
-
-    # Start background scanner
-    asyncio.get_event_loop().create_task(start_scanner())
-
     app.run_polling()
 
 
