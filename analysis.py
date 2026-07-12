@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "
+API_KEY = "aba787bf68ba4008b359f34229fdbc29"
 
 
 def get_candles(symbol, interval):
@@ -217,33 +217,28 @@ def detect_fvg(candles):
 
 def generate_signal(bias, zone, ob, mss, engulfing, displacement, fvg):
 
+    buy_score = 0
+    sell_score = 0
 
-    if (
-        "Bullish" in bias
-        and "Discount" in zone
-        and "Bullish Order Block" in ob
-        and "Bullish MSS" in mss
-        and (
-            "Bullish Engulfing" in engulfing
-            or "Bullish Displacement" in displacement
-        )
-    ):
+    if "Bullish" in bias: buy_score += 1
+    if "Bearish" in bias: sell_score += 1
+    if "Discount" in zone: buy_score += 1
+    if "Premium" in zone: sell_score += 1
+    if "Bullish Order Block" in ob: buy_score += 1
+    if "Bearish Order Block" in ob: sell_score += 1
+    if "Bullish MSS" in mss: buy_score += 2
+    if "Bearish MSS" in mss: sell_score += 2
+    if "Bullish Engulfing" in engulfing: buy_score += 1
+    if "Bearish Engulfing" in engulfing: sell_score += 1
+    if "Bullish Displacement" in displacement: buy_score += 1
+    if "Bearish Displacement" in displacement: sell_score += 1
+    if "Bullish FVG" in fvg: buy_score += 1
+    if "Bearish FVG" in fvg: sell_score += 1
+
+    if buy_score >= 7:
         return "BUY 🟢"
-
-
-    if (
-        "Bearish" in bias
-        and "Premium" in zone
-        and "Bearish Order Block" in ob
-        and "Bearish MSS" in mss
-        and (
-            "Bearish Engulfing" in engulfing
-            or "Bearish Displacement" in displacement
-        )
-    ):
+    if sell_score >= 7:
         return "SELL 🔴"
-
-
     return "WAIT ⏳"
 
 
