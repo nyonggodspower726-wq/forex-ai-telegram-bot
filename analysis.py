@@ -211,3 +211,120 @@ def detect_fvg(candles):
 
 
     return "No FVG yet"
+def generate_signal(bias, zone, ob, mss, engulfing, displacement, fvg):
+
+    if (
+        "Bullish" in bias
+        and "Discount" in zone
+        and "Bullish Order Block" in ob
+        and "Bullish MSS" in mss
+        and (
+            "Bullish Engulfing" in engulfing
+            or "Bullish Displacement" in displacement
+        )
+        and (
+            "Bullish FVG" in fvg
+            or "Bullish Displacement" in displacement
+        )
+    ):
+        return "BUY 🟢"
+
+
+    if (
+        "Bearish" in bias
+        and "Premium" in zone
+        and "Bearish Order Block" in ob
+        and "Bearish MSS" in mss
+        and (
+            "Bearish Engulfing" in engulfing
+            or "Bearish Displacement" in displacement
+        )
+        and (
+            "Bearish FVG" in fvg
+            or "Bearish Displacement" in displacement
+        )
+    ):
+        return "SELL 🔴"
+
+
+    return "WAIT ⏳"
+
+
+
+def analyze_market(symbol):
+
+    symbols = {
+        "XAUUSD": "XAU/USD",
+        "BTCUSD": "BTC/USD",
+        "ETHUSD": "ETH/USD"
+    }
+
+
+    symbol = symbols.get(symbol.upper(), symbol)
+
+
+    h1 = get_candles(symbol, "1h")
+    m5 = get_candles(symbol, "5min")
+
+
+    if not h1 or not m5:
+        return "❌ Unable to get market data"
+
+
+    bias = detect_bias(h1)
+
+    zone = detect_premium_discount(h1)
+
+    ob = detect_order_block(m5)
+
+    mss = detect_mss(m5)
+
+    engulfing = detect_engulfing(m5)
+
+    displacement = detect_displacement(m5)
+
+    fvg = detect_fvg(m5)
+
+
+    signal = generate_signal(
+        bias,
+        zone,
+        ob,
+        mss,
+        engulfing,
+        displacement,
+        fvg
+    )
+
+
+    return f"""
+📊 PipsPilot AI
+
+Symbol: {symbol}
+
+1H Intraday Bias:
+{bias}
+
+1H Zone:
+{zone}
+
+5M Order Block:
+{ob}
+
+5M MSS:
+{mss}
+
+5M Confirmation:
+{engulfing}
+
+5M Displacement:
+{displacement}
+
+5M Imbalance:
+{fvg}
+
+Signal:
+{signal}
+
+Data connection ✅
+"""
