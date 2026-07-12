@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "aba787bf68ba4008b359f34229fdbc29"
+API_KEY = "YOUR_TWELVE_DATA_KEY"
 
 
 def get_candles(symbol, interval):
@@ -19,7 +19,6 @@ def get_candles(symbol, interval):
 
 
 def detect_bias(candles):
-
     if len(candles) < 10:
         return "Not enough data"
 
@@ -54,7 +53,6 @@ def detect_order_block(candles):
     if len(candles) < 6:
         return "Not enough data"
 
-
     for i in range(1, 5):
 
         current = candles[i-1]
@@ -67,7 +65,6 @@ def detect_order_block(candles):
         previous_close = float(previous["close"])
 
 
-        # Bullish OB
         if (
             previous_close < previous_open
             and current_close > current_open
@@ -76,7 +73,6 @@ def detect_order_block(candles):
             return "Bullish Order Block 🟢"
 
 
-        # Bearish OB
         if (
             previous_close > previous_open
             and current_close < current_open
@@ -93,14 +89,12 @@ def detect_mss(candles):
     if len(candles) < 5:
         return "Not enough data"
 
-
     recent = candles[:5]
 
     highs = [float(c["high"]) for c in recent]
     lows = [float(c["low"]) for c in recent]
 
     current_close = float(recent[0]["close"])
-
 
     previous_high = max(highs[1:])
     previous_low = min(lows[1:])
@@ -122,10 +116,8 @@ def detect_engulfing(candles):
     if len(candles) < 2:
         return "Not enough data"
 
-
     current = candles[0]
     previous = candles[1]
-
 
     co = float(current["open"])
     cc = float(current["close"])
@@ -157,11 +149,10 @@ def detect_engulfing(candles):
 
 def generate_signal(bias, zone, ob, mss, engulfing):
 
-
     if (
         "Bullish" in bias
         and "Discount" in zone
-        and "Bullish" in ob
+        and "Bullish Order Block" in ob
         and "Bullish MSS" in mss
         and "Bullish Engulfing" in engulfing
     ):
@@ -171,7 +162,7 @@ def generate_signal(bias, zone, ob, mss, engulfing):
     if (
         "Bearish" in bias
         and "Premium" in zone
-        and "Bearish" in ob
+        and "Bearish Order Block" in ob
         and "Bearish MSS" in mss
         and "Bearish Engulfing" in engulfing
     ):
@@ -179,7 +170,6 @@ def generate_signal(bias, zone, ob, mss, engulfing):
 
 
     return "WAIT ⏳"
-
 
 
 def analyze_market(symbol):
@@ -190,9 +180,7 @@ def analyze_market(symbol):
         "ETHUSD": "ETH/USD"
     }
 
-
     symbol = symbols.get(symbol.upper(), symbol)
-
 
     h1 = get_candles(symbol, "1h")
     m5 = get_candles(symbol, "5min")
@@ -203,7 +191,6 @@ def analyze_market(symbol):
 
 
     bias = detect_bias(h1)
-
     zone = detect_premium_discount(h1)
 
     ob = detect_order_block(m5)
