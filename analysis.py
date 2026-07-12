@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "aba787bf68ba4008b359f34229fdbc29"
+API_KEY = "YOUR_TWELVE_DATA_KEY"
 
 
 def get_candles(symbol, interval):
@@ -19,6 +19,7 @@ def get_candles(symbol, interval):
 
 
 def detect_bias(candles):
+
     if len(candles) < 10:
         return "Not enough data"
 
@@ -109,9 +110,7 @@ def detect_mss(candles):
 
 
     return "No MSS yet"
-
-
-def detect_engulfing(candles):
+   def detect_engulfing(candles):
 
     if len(candles) < 2:
         return "Not enough data"
@@ -147,14 +146,85 @@ def detect_engulfing(candles):
     return "No Engulfing yet"
 
 
-def generate_signal(bias, zone, ob, mss, engulfing):
+def detect_displacement(candles):
+
+    if len(candles) < 3:
+        return "Not enough data"
+
+
+    current = candles[0]
+    previous = candles[1]
+
+
+    current_open = float(current["open"])
+    current_close = float(current["close"])
+
+    previous_high = float(previous["high"])
+    previous_low = float(previous["low"])
+
+
+    body = abs(current_close - current_open)
+
+    previous_range = abs(previous_high - previous_low)
+
+
+    if (
+        current_close > current_open
+        and body > previous_range * 0.7
+    ):
+        return "Bullish Displacement 🟢"
+
+
+    if (
+        current_close < current_open
+        and body > previous_range * 0.7
+    ):
+        return "Bearish Displacement 🔴"
+
+
+    return "No Displacement yet"
+
+
+def detect_fvg(candles):
+
+    if len(candles) < 3:
+        return "Not enough data"
+
+
+    candle1 = candles[2]
+    candle3 = candles[0]
+
+
+    candle1_high = float(candle1["high"])
+    candle1_low = float(candle1["low"])
+
+    candle3_high = float(candle3["high"])
+    candle3_low = float(candle3["low"])
+
+
+    if candle3_low > candle1_high:
+        return "Bullish FVG 🟢"
+
+
+    if candle3_high < candle1_low:
+        return "Bearish FVG 🔴"
+
+
+    return "No FVG yet"
+
+
+def generate_signal(bias, zone, ob, mss, engulfing, displacement, fvg):
+
 
     if (
         "Bullish" in bias
         and "Discount" in zone
         and "Bullish Order Block" in ob
         and "Bullish MSS" in mss
-        and "Bullish Engulfing" in engulfing
+        and (
+            "Bullish Engulfing" in engulfing
+            or "Bullish Displacement" in displacement
+        )
     ):
         return "BUY 🟢"
 
@@ -164,7 +234,10 @@ def generate_signal(bias, zone, ob, mss, engulfing):
         and "Premium" in zone
         and "Bearish Order Block" in ob
         and "Bearish MSS" in mss
-        and "Bearish Engulfing" in engulfing
+        and (
+            "Bearish Engulfing" in engulfing
+            or "Bearish Displacement" in displacement
+        )
     ):
         return "SELL 🔴"
 
@@ -180,7 +253,9 @@ def analyze_market(symbol):
         "ETHUSD": "ETH/USD"
     }
 
+
     symbol = symbols.get(symbol.upper(), symbol)
+
 
     h1 = get_candles(symbol, "1h")
     m5 = get_candles(symbol, "5min")
@@ -191,6 +266,7 @@ def analyze_market(symbol):
 
 
     bias = detect_bias(h1)
+
     zone = detect_premium_discount(h1)
 
     ob = detect_order_block(m5)
@@ -199,13 +275,19 @@ def analyze_market(symbol):
 
     engulfing = detect_engulfing(m5)
 
+    displacement = detect_displacement(m5)
+
+    fvg = detect_fvg(m5)
+
 
     signal = generate_signal(
         bias,
         zone,
         ob,
         mss,
-        engulfing
+        engulfing,
+        displacement,
+        fvg
     )
 
 
@@ -223,14 +305,20 @@ Symbol: {symbol}
 5M Order Block:
 {ob}
 
-5M Entry Analysis:
+5M MSS:
 {mss}
 
-Confirmation:
+5M Confirmation:
 {engulfing}
+
+5M Displacement:
+{displacement}
+
+5M Imbalance:
+{fvg}
 
 Signal:
 {signal}
 
 Data connection ✅
-"""
+""" 
