@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "aba787bf68ba4008b359f34229fdbc29"
+API_KEY = "YOUR_TWELVE_DATA_KEY"
 
 
 def get_candles(symbol, interval):
@@ -32,23 +32,58 @@ def detect_bias(candles):
 
 def detect_premium_discount(candles):
 
-    if len(candles) < 10:
-        return "Not enough data"
-
     highs = [float(c["high"]) for c in candles]
     lows = [float(c["low"]) for c in candles]
 
-    range_high = max(highs)
-    range_low = min(lows)
+    high = max(highs)
+    low = min(lows)
 
-    current_price = float(candles[0]["close"])
+    price = float(candles[0]["close"])
 
-    midpoint = (range_high + range_low) / 2
+    midpoint = (high + low) / 2
 
-    if current_price > midpoint:
+    if price > midpoint:
         return "Premium Zone 🔴"
     else:
         return "Discount Zone 🟢"
+
+
+def detect_order_block(candles):
+
+    if len(candles) < 5:
+        return "Not enough data"
+
+    current = candles[0]
+    previous = candles[1]
+
+    current_open = float(current["open"])
+    current_close = float(current["close"])
+
+    previous_open = float(previous["open"])
+    previous_close = float(previous["close"])
+
+
+    # Bullish order block:
+    # Previous bearish candle followed by bullish displacement
+    if (
+        previous_close < previous_open
+        and current_close > current_open
+        and current_close > previous_open
+    ):
+        return "Bullish Order Block 🟢"
+
+
+    # Bearish order block:
+    # Previous bullish candle followed by bearish displacement
+    if (
+        previous_close > previous_open
+        and current_close < current_open
+        and current_close < previous_open
+    ):
+        return "Bearish Order Block 🔴"
+
+
+    return "No Order Block yet"
 
 
 def detect_mss(candles):
@@ -66,11 +101,14 @@ def detect_mss(candles):
     previous_high = max(highs[1:])
     previous_low = min(lows[1:])
 
+
     if current_close > previous_high:
         return "Bullish MSS 🟢"
 
+
     if current_close < previous_low:
         return "Bearish MSS 🔴"
+
 
     return "No MSS yet"
 
@@ -83,48 +121,45 @@ def detect_engulfing(candles):
     current = candles[0]
     previous = candles[1]
 
-    current_open = float(current["open"])
-    current_close = float(current["close"])
+    co = float(current["open"])
+    cc = float(current["close"])
 
-    previous_open = float(previous["open"])
-    previous_close = float(previous["close"])
+    po = float(previous["open"])
+    pc = float(previous["close"])
 
-    if (
-        previous_close < previous_open
-        and current_close > current_open
-        and current_close > previous_open
-        and current_open < previous_close
-    ):
+
+    if pc < po and cc > co and cc > po and co < pc:
         return "Bullish Engulfing 🟢"
 
-    if (
-        previous_close > previous_open
-        and current_close < current_open
-        and current_close < previous_open
-        and current_open > previous_close
-    ):
+
+    if pc > po and cc < co and cc < po and co > pc:
         return "Bearish Engulfing 🔴"
+
 
     return "No Engulfing yet"
 
 
-def generate_signal(bias, mss, engulfing, zone):
+def generate_signal(bias, zone, ob, mss, engulfing):
 
     if (
         "Bullish" in bias
         and "Discount" in zone
+        and "Bullish" in ob
         and "Bullish MSS" in mss
         and "Bullish Engulfing" in engulfing
     ):
         return "BUY 🟢"
 
+
     if (
         "Bearish" in bias
         and "Premium" in zone
+        and "Bearish" in ob
         and "Bearish MSS" in mss
         and "Bearish Engulfing" in engulfing
     ):
         return "SELL 🔴"
+
 
     return "WAIT ⏳"
 
@@ -139,24 +174,33 @@ def analyze_market(symbol):
 
     symbol = symbols.get(symbol.upper(), symbol)
 
+
     h1 = get_candles(symbol, "1h")
     m5 = get_candles(symbol, "5min")
+
 
     if not h1 or not m5:
         return "❌ Unable to get market data"
 
+
     bias = detect_bias(h1)
     zone = detect_premium_discount(h1)
 
+    ob = detect_order_block(m5)
+
     mss = detect_mss(m5)
+
     engulfing = detect_engulfing(m5)
+
 
     signal = generate_signal(
         bias,
+        zone,
+        ob,
         mss,
-        engulfing,
-        zone
+        engulfing
     )
+
 
     return f"""
 📊 PipsPilot AI
@@ -168,6 +212,9 @@ Symbol: {symbol}
 
 1H Zone:
 {zone}
+
+5M Order Block:
+{ob}
 
 5M Entry Analysis:
 {mss}
