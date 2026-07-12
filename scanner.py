@@ -1,4 +1,8 @@
+import asyncio
+from datetime import datetime
+
 from analysis import analyze_market
+
 
 PAIRS = [
     "XAUUSD",
@@ -7,25 +11,27 @@ PAIRS = [
 ]
 
 
-async def scanner_job(context):
+async def start_scanner():
 
-    bot = context.bot
+    print("Market scanner started...")
 
-    chat_id = context.job.chat_id
+    while True:
 
-    for pair in PAIRS:
+        for pair in PAIRS:
 
-        try:
+            try:
 
-            result = analyze_market(pair)
+                result = analyze_market(pair)
 
-            if "BUY 🟢" in result or "SELL 🔴" in result:
-
-                await bot.send_message(
-                    chat_id=chat_id,
-                    text="🚨 PipsPilot AI Signal\n\n" + result
+                print(
+                    f"\n{datetime.now()}\n"
+                    f"{result}"
                 )
 
-        except Exception as e:
+                if "BUY 🟢" in result or "SELL 🔴" in result:
+                    print("🚨 SIGNAL FOUND")
 
-            print(f"Scanner Error: {e}")
+            except Exception as e:
+                print(f"Scanner Error ({pair}): {e}")
+
+        await asyncio.sleep(300)
