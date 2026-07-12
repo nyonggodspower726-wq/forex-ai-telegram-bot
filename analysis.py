@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "YOUR_TWELVE_DATA_KEY"
+API_KEY = "aba787bf68ba4008b359f34229fdbc29"
 
 
 def analyze_market(symbol):
