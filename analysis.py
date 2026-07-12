@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "YOUR_TWELVE_DATA_API_KEY"
+API_KEY = "aba787bf68ba4008b359f34229fdbc29"
 
 def analyze_market(symbol):
     url = f"https://api.twelvedata.com/price?symbol={symbol}&apikey={API_KEY}"
