@@ -215,30 +215,27 @@ def detect_fvg(candles):
     return "No FVG yet"
 
 
-def generate_signal(bias, zone, ob, mss, engulfing, displacement, fvg):
+def generate_signal(bias, zone, ob, engulfing):
 
-    buy_score = 0
-    sell_score = 0
 
-    if "Bullish" in bias: buy_score += 1
-    if "Bearish" in bias: sell_score += 1
-    if "Discount" in zone: buy_score += 1
-    if "Premium" in zone: sell_score += 1
-    if "Bullish Order Block" in ob: buy_score += 1
-    if "Bearish Order Block" in ob: sell_score += 1
-    if "Bullish MSS" in mss: buy_score += 2
-    if "Bearish MSS" in mss: sell_score += 2
-    if "Bullish Engulfing" in engulfing: buy_score += 1
-    if "Bearish Engulfing" in engulfing: sell_score += 1
-    if "Bullish Displacement" in displacement: buy_score += 1
-    if "Bearish Displacement" in displacement: sell_score += 1
-    if "Bullish FVG" in fvg: buy_score += 1
-    if "Bearish FVG" in fvg: sell_score += 1
-
-    if buy_score >= 7:
+    if (
+        "Bullish" in bias
+        and "Discount" in zone
+        and "Bullish Order Block" in ob
+        and "Bullish Engulfing" in engulfing
+    ):
         return "BUY 🟢"
-    if sell_score >= 7:
+
+
+    if (
+        "Bearish" in bias
+        and "Premium" in zone
+        and "Bearish Order Block" in ob
+        and "Bearish Engulfing" in engulfing
+    ):
         return "SELL 🔴"
+
+
     return "WAIT ⏳"
 
 
@@ -270,23 +267,14 @@ def analyze_market(symbol):
 
     ob = detect_order_block(h1)
 
-    mss = detect_mss(m5)
-
     engulfing = detect_engulfing(m5)
-
-    displacement = detect_displacement(m5)
-
-    fvg = detect_fvg(m5)
 
 
     signal = generate_signal(
         bias,
         zone,
         ob,
-        mss,
-        engulfing,
-        displacement,
-        fvg
+        engulfing
     )
 
 
@@ -301,20 +289,11 @@ Symbol: {symbol}
 1H Zone:
 {zone}
 
-5M Order Block:
+1H Order Block:
 {ob}
-
-5M MSS:
-{mss}
 
 5M Confirmation:
 {engulfing}
-
-5M Displacement:
-{displacement}
-
-5M Imbalance:
-{fvg}
 
 Signal:
 {signal}
