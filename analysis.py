@@ -109,8 +109,8 @@ def detect_mss(candles):
         return "Bearish MSS 🔴"
 
 
-    return "No MSS yet"
-   def detect_engulfing(candles):
+    return "No MSS yetdef
+    def detect_engulfing(candles):
 
     if len(candles) < 2:
         return "Not enough data"
