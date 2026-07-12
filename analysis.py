@@ -110,6 +110,8 @@ def detect_mss(candles):
 
 
     return "No MSS yet"
+
+
   def detect_engulfing(candles):
 
     if len(candles) < 2:
