@@ -3,7 +3,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 
 from analysis import analyze_market
 
-TOKEN = "PASTE_YOUR_NEW_BOT_TOKEN_HERE"
+TOKEN = "8858152810:AAGqN11B46iDcHw6UgPk8qdRkJAhRHtn3Fk"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
