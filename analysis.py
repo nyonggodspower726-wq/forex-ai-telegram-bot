@@ -211,46 +211,59 @@ def detect_fvg(candles):
 
 
     return "No FVG yet"
-def generate_signal(bias, zone, ob, mss, engulfing, displacement, fvg):
 
+    
+    def generate_signal(bias, zone, ob, mss, engulfing, displacement, fvg):
+
+    bullish_score = 0
+    bearish_score = 0
+
+    # Bullish confirmations
+    if "Bullish MSS" in mss:
+        bullish_score += 1
+
+    if "Bullish Engulfing" in engulfing:
+        bullish_score += 1
+
+    if "Bullish Displacement" in displacement:
+        bullish_score += 1
+
+    if "Bullish FVG" in fvg:
+        bullish_score += 1
+
+    # Bearish confirmations
+    if "Bearish MSS" in mss:
+        bearish_score += 1
+
+    if "Bearish Engulfing" in engulfing:
+        bearish_score += 1
+
+    if "Bearish Displacement" in displacement:
+        bearish_score += 1
+
+    if "Bearish FVG" in fvg:
+        bearish_score += 1
+
+    # BUY
     if (
         "Bullish" in bias
         and "Discount" in zone
         and "Bullish Order Block" in ob
-        and "Bullish MSS" in mss
-        and (
-            "Bullish Engulfing" in engulfing
-            or "Bullish Displacement" in displacement
-        )
-        and (
-            "Bullish FVG" in fvg
-            or "Bullish Displacement" in displacement
-        )
+        and bullish_score >= 2
     ):
         return "BUY 🟢"
 
-
+    # SELL
     if (
         "Bearish" in bias
         and "Premium" in zone
         and "Bearish Order Block" in ob
-        and "Bearish MSS" in mss
-        and (
-            "Bearish Engulfing" in engulfing
-            or "Bearish Displacement" in displacement
-        )
-        and (
-            "Bearish FVG" in fvg
-            or "Bearish Displacement" in displacement
-        )
+        and bearish_score >= 2
     ):
         return "SELL 🔴"
 
-
     return "WAIT ⏳"
-
-
-
+    
 def analyze_market(symbol):
 
     symbols = {
