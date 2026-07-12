@@ -254,11 +254,12 @@ def generate_signal(bias, zone, ob, mss, engulfing, displacement, fvg):
 def analyze_market(symbol):
 
     symbols = {
-        "XAUUSD": "XAU/USD",
-        "BTCUSD": "BTC/USD",
-        "ETHUSD": "ETH/USD"
+    "XAUUSD": "XAU/USD",
+    "BTCUSD": "BTC/USD",
+    "ETHUSD": "ETH/USD",
+    "EURUSD": "EUR/USD",
+    "GBPUSD": "GBP/USD"
     }
-
 
     symbol = symbols.get(symbol.upper(), symbol)
 
