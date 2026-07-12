@@ -1,23 +1,25 @@
-def analyze_market(symbol):
-    symbol = symbol.upper()
+import requests
 
-    if symbol == "XAUUSD":
-        return f"""
+API_KEY = "PASTE_YOUR_TWELVE_DATA_API_KEY"
+
+def analyze_market(symbol):
+    url = f"https://api.twelvedata.com/price?symbol={symbol}&apikey={API_KEY}"
+
+    response = requests.get(url)
+    data = response.json()
+
+    if "price" not in data:
+        return f"❌ Unable to get price for {symbol}"
+
+    price = float(data["price"])
+
+    return f"""
 📊 PipsPilot AI
 
 Symbol: {symbol}
+Live Price: {price}
 
-Trend: Bullish 🟢
+Trend: Waiting for AI Analysis...
 
-Entry: 3348.20
-Stop Loss: 3342.00
-Take Profit: 3362.50
-
-Risk Reward: 1:3
-
-Confidence: 87%
-
-⚠ Demo Analysis Only
+⚠️ Live data connected successfully.
 """
-
-    return f"❌ {symbol} is not supported yet."
