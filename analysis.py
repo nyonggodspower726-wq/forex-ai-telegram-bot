@@ -1,6 +1,33 @@
 import requests
 
-API_KEY = "aba787bf68ba4008b359f34229fdbc29"
+API_KEY = "YOUR_TWELVE_DATA_KEY"
+
+
+def get_candles(symbol, interval):
+    url = (
+        f"https://api.twelvedata.com/time_series"
+        f"?symbol={symbol}"
+        f"&interval={interval}"
+        f"&outputsize=50"
+        f"&apikey={API_KEY}"
+    )
+
+    response = requests.get(url)
+    data = response.json()
+
+    return data.get("values", [])
+
+
+def detect_bias(candles):
+    if len(candles) < 10:
+        return "Not enough data"
+
+    closes = [float(c["close"]) for c in candles]
+
+    if closes[0] > closes[-1]:
+        return "Bullish 🟢"
+    else:
+        return "Bearish 🔴"
 
 
 def analyze_market(symbol):
@@ -13,34 +40,21 @@ def analyze_market(symbol):
 
     symbol = symbols.get(symbol.upper(), symbol)
 
-    url = (
-        f"https://api.twelvedata.com/time_series"
-        f"?symbol={symbol}"
-        f"&interval=5min"
-        f"&outputsize=10"
-        f"&apikey={API_KEY}"
-    )
+    h1 = get_candles(symbol, "1h")
+    m5 = get_candles(symbol, "5min")
 
-    response = requests.get(url)
-    data = response.json()
-
-    if "values" not in data:
-        return f"❌ Data error:\n{data}"
-
-    candles = data["values"]
-
-    latest = candles[0]
+    bias = detect_bias(h1)
 
     return f"""
 📊 PipsPilot AI
 
 Symbol: {symbol}
 
-Latest Candle:
-Open: {latest['open']}
-High: {latest['high']}
-Low: {latest['low']}
-Close: {latest['close']}
+1H Intraday Bias:
+{bias}
 
-Candle data connected ✅
+5M Analysis:
+Waiting for MSS + Engulfing confirmation...
+
+Data connection ✅
 """
