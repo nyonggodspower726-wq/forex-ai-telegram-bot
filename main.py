@@ -1,9 +1,9 @@
-importrtNNysis telegram import Update
+import telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 import asyncio
 
-from strategy_v2 import analyze_market
+from analysis import analyze_market
 from scanner import start_scanner
 
 
