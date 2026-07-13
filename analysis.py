@@ -21,14 +21,23 @@ def get_candles(symbol, interval):
 def detect_bias(candles):
 
     if len(candles) < 10:
-        return "Not enough data"
+        return "No Trend"
 
-    closes = [float(c["close"]) for c in candles]
+    highs = [float(c["high"]) for c in candles[:10]]
+    lows = [float(c["low"]) for c in candles[:10]]
 
-    if closes[0] > closes[-1]:
+    recent_high = highs[0]
+    previous_high = max(highs[1:5])
+    recent_low = lows[0]
+    previous_low = min(lows[1:5])
+
+    if recent_high > previous_high and recent_low > previous_low:
         return "Bullish 🟢"
 
-    return "Bearish 🔴"
+    if recent_high < previous_high and recent_low < previous_low:
+        return "Bearish 🔴"
+
+    return "Range / Transition 🟡"
 
 
 def detect_premium_discount(candles):
