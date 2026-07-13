@@ -1,92 +1,124 @@
-def generate_signal(symbol):
+import requests
 
-    # 4H Trend
-    candles_4h = get_candles(symbol, "4h")
-    trend_4h = detect_4h_trend(candles_4h)
-
-    if trend_4h == "No Trend":
-        return "WAIT ⏳\nNo 4H trend"
+API_KEY = "YOUR_API_KEY"
 
 
-    # 1H Structure
-    candles_1h = get_candles(symbol, "1h")
-    structure_1h = detect_1h_structure(candles_1h)
+def get_candles(symbol, interval):
 
-
-    # 1H Order Block
-    order_block = detect_order_block_zone(candles_1h)
-
-    if order_block is None:
-        return (
-            f"📊 PipsPilot AI\n\n"
-            f"Symbol: {symbol}\n\n"
-            f"4H Trend: {trend_4h}\n"
-            f"1H Structure: {structure_1h['structure']}\n"
-            "1H Order Block: Not Found\n\n"
-            "Signal: WAIT ⏳"
-        )
-
-
-    # Current price
-    current_price = float(candles_1h[0]["close"])
-
-
-    # Retracement into Order Block
-    retracement = wait_for_retracement(
-        order_block,
-        current_price
+    url = (
+        f"https://api.twelvedata.com/time_series"
+        f"?symbol={symbol}"
+        f"&interval={interval}"
+        f"&outputsize=100"
+        f"&apikey={API_KEY}"
     )
 
+    response = requests.get(url)
+    data = response.json()
 
-    if not retracement:
-        return (
-            f"📊 PipsPilot AI\n\n"
-            f"Symbol: {symbol}\n\n"
-            f"4H Trend: {trend_4h}\n"
-            f"1H Structure: {structure_1h['structure']}\n"
-            f"Order Block: {order_block['type']} OB\n"
-            "Price: Waiting for retracement ⏳\n\n"
-            "Signal: WAIT"
-        )
+    return data.get("values", [])
 
 
-    # 5M Confirmation
-    candles_5m = get_candles(symbol, "5min")
-    confirmation = detect_confirmation(candles_5m)
+def detect_4h_trend(candles):
+
+    if len(candles) < 20:
+        return "No Trend"
+
+    highs = [float(c["high"]) for c in candles[:20]]
+    lows = [float(c["low"]) for c in candles[:20]]
+
+    last_high = highs[0]
+    previous_high = highs[5]
+
+    last_low = lows[0]
+    previous_low = lows[5]
+
+    if last_high > previous_high and last_low > previous_low:
+        return "Bullish 🟢"
+
+    if last_high < previous_high and last_low < previous_low:
+        return "Bearish 🔴"
+
+    return "Range 🟡"
 
 
-    if confirmation["confirmed"]:
+def detect_1h_structure(candles):
 
-        return (
-            f"🚨 PipsPilot AI SIGNAL\n\n"
-            f"Symbol: {symbol}\n\n"
-            f"4H Trend: {trend_4h}\n"
-            f"1H Structure: {structure_1h['structure']}\n"
-            f"Order Block: {order_block['type']} OB\n"
-            f"Confirmation: {confirmation['type']}\n\n"
-            f"Signal: {confirmation['signal']} ✅"
-        )
+    if len(candles) < 20:
+        return {
+            "trend": "None",
+            "structure": "No Structure"
+        }
+
+    highs = [float(c["high"]) for c in candles[:20]]
+    lows = [float(c["low"]) for c in candles[:20]]
+
+    recent_high = highs[0]
+    previous_high = highs[5]
+
+    recent_low = lows[0]
+    previous_low = lows[5]
+
+    if recent_high > previous_high and recent_low > previous_low:
+        return {
+            "trend": "Bullish",
+            "structure": "HH → HL 🟢"
+        }
+
+    if recent_high < previous_high and recent_low < previous_low:
+        return {
+            "trend": "Bearish",
+            "structure": "LH → LL 🔴"
+        }
+
+    return {
+        "trend": "Range",
+        "structure": "Transition 🟡"
+    }
 
 
-    return (
-        f"📊 PipsPilot AI\n\n"
-        f"Symbol: {symbol}\n\n"
-        f"4H Trend: {trend_4h}\n"
-        f"1H Structure: {structure_1h['structure']}\n"
-        f"Order Block: {order_block['type']} OB\n"
-        "5M Confirmation: Waiting ⏳\n\n"
-        "Signal: WAIT"
-    )
+def detect_order_block_zone(candles):
+
+    if len(candles) < 10:
+        return None
+
+    for i in range(2, len(candles)-1):
+
+        current = candles[i-1]
+        previous = candles[i]
+
+        current_open = float(current["open"])
+        current_close = float(current["close"])
+
+        previous_open = float(previous["open"])
+        previous_close = float(previous["close"])
+
+        previous_high = float(previous["high"])
+        previous_low = float(previous["low"])
 
 
-def analyze_market(symbol):
+        if (
+            previous_close < previous_open
+            and current_close > current_open
+            and current_close > previous_open
+        ):
+            return {
+                "type": "Bullish",
+                "high": previous_high,
+                "low": previous_low
+            }
 
-    try:
-        return generate_signal(symbol)
 
-    except Exception as e:
-        return (
-            f"📊 PipsPilot AI\n\n"
-            f"Symbol: {symbol}\n"
-            f"Error: {str(e)}"
-        )
+        if (
+            previous_close > previous_open
+            and current_close < current_open
+            and current_close < previous_open
+        ):
+            return {
+                "type": "Bearish",
+                "high": previous_high,
+                "low": previous_low
+            }
+
+
+    return None
