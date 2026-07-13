@@ -3,11 +3,10 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 
 import asyncio
 
-from analysis import analyze_market
+from strategy_v2 import analyze_market
 from scanner import start_scanner
 
-
-TOKEN = "8858152810:AAGVLGsa9VunTglspZfvW1ivu-sCcghzxEI"
+TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -31,7 +30,6 @@ async def analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-
     symbol = context.args[0].upper()
 
     result = analyze_market(symbol)
@@ -39,27 +37,20 @@ async def analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(result)
 
 
-
 def main():
 
     app = Application.builder().token(TOKEN).build()
 
-
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("analysis", analysis))
 
-
     print("Bot is running...")
 
-
-    # Start market scanner
     asyncio.get_event_loop().create_task(
         start_scanner()
     )
 
-
     app.run_polling()
-
 
 
 if __name__ == "__main__":
