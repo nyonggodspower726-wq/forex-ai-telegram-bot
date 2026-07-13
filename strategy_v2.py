@@ -134,3 +134,68 @@ def wait_for_retracement(order_block, current_price):
         return True
 
     return False
+
+
+def detect_confirmation(candles):
+
+    if len(candles) < 2:
+        return {
+            "confirmed": False,
+            "signal": "WAIT",
+            "type": "None"
+        }
+
+    current = candles[0]
+    previous = candles[1]
+
+    current_open = float(current["open"])
+    current_close = float(current["close"])
+
+    previous_open = float(previous["open"])
+    previous_close = float(previous["close"])
+
+    # Bullish Engulfing
+    if (
+        previous_close < previous_open
+        and current_close > current_open
+        and current_close > previous_open
+    ):
+        return {
+            "confirmed": True,
+            "signal": "BUY",
+            "type": "Bullish Engulfing"
+        }
+
+    # Bearish Engulfing
+    if (
+        previous_close > previous_open
+        and current_close < current_open
+        and current_close < previous_open
+    ):
+        return {
+            "confirmed": True,
+            "signal": "SELL",
+            "type": "Bearish Engulfing"
+        }
+
+    # Bullish Overlap
+    if current_close > previous_close:
+        return {
+            "confirmed": True,
+            "signal": "BUY",
+            "type": "Bullish Overlap"
+        }
+
+    # Bearish Overlap
+    if current_close < previous_close:
+        return {
+            "confirmed": True,
+            "signal": "SELL",
+            "type": "Bearish Overlap"
+        }
+
+    return {
+        "confirmed": False,
+        "signal": "WAIT",
+        "type": "None"
+    }
