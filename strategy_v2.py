@@ -74,3 +74,49 @@ def detect_1h_structure(candles):
         "trend": "Range",
         "structure": "Transition 🟡"
     }
+
+
+def detect_order_block_zone(candles):
+
+    if len(candles) < 10:
+        return None
+
+    for i in range(2, len(candles) - 1):
+
+        current = candles[i - 1]
+        previous = candles[i]
+
+        current_open = float(current["open"])
+        current_close = float(current["close"])
+
+        previous_open = float(previous["open"])
+        previous_close = float(previous["close"])
+
+        previous_high = float(previous["high"])
+        previous_low = float(previous["low"])
+
+        # Bullish Order Block
+        if (
+            previous_close < previous_open
+            and current_close > current_open
+            and current_close > previous_open
+        ):
+            return {
+                "type": "Bullish",
+                "high": previous_high,
+                "low": previous_low
+            }
+
+        # Bearish Order Block
+        if (
+            previous_close > previous_open
+            and current_close < current_open
+            and current_close < previous_open
+        ):
+            return {
+                "type": "Bearish",
+                "high": previous_high,
+                "low": previous_low
+            }
+
+    return None
