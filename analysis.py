@@ -253,15 +253,16 @@ def analyze_market(symbol):
     symbol = symbols.get(symbol.upper(), symbol)
 
 
+    h4 = get_candles(symbol, "4h")
     h1 = get_candles(symbol, "1h")
     m5 = get_candles(symbol, "5min")
 
 
-    if not h1 or not m5:
+    if not h4 or not h1 or not m5:
         return "❌ Unable to get market data"
 
 
-    bias = detect_bias(h1)
+    bias = detect_bias(h4)
 
     zone = detect_premium_discount(h1)
 
@@ -283,7 +284,7 @@ def analyze_market(symbol):
 
 Symbol: {symbol}
 
-1H Intraday Bias:
+4H Trend:
 {bias}
 
 1H Zone:
