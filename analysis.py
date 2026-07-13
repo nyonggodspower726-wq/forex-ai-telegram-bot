@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "aba787bf68ba4008b359f34229fdbc29"
+API_KEY = 
 
 
 def get_candles(symbol, interval):
