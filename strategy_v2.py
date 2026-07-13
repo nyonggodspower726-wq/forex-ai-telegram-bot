@@ -39,3 +39,38 @@ def detect_4h_trend(candles):
         return "Bearish 🔴"
 
     return "Range 🟡"
+
+
+def detect_1h_structure(candles):
+
+    if len(candles) < 20:
+        return {
+            "trend": "None",
+            "structure": "No Structure"
+        }
+
+    highs = [float(c["high"]) for c in candles[:20]]
+    lows = [float(c["low"]) for c in candles[:20]]
+
+    recent_high = highs[0]
+    previous_high = highs[5]
+
+    recent_low = lows[0]
+    previous_low = lows[5]
+
+    if recent_high > previous_high and recent_low > previous_low:
+        return {
+            "trend": "Bullish",
+            "structure": "HH → HL 🟢"
+        }
+
+    if recent_high < previous_high and recent_low < previous_low:
+        return {
+            "trend": "Bearish",
+            "structure": "LH → LL 🔴"
+        }
+
+    return {
+        "trend": "Range",
+        "structure": "Transition 🟡"
+    }
