@@ -20,22 +20,30 @@ def get_candles(symbol, interval):
 
 def detect_4h_trend(candles):
 
-    if len(candles) < 20:
+    if len(candles) < 10:
         return "No Trend"
 
-    highs = [float(c["high"]) for c in candles[:20]]
-    lows = [float(c["low"]) for c in candles[:20]]
+    highs=[float(c["high"]) for c in candles[:10]]
+    lows=[float(c["low"]) for c in candles[:10]]
 
-    last_high = highs[0]
-    previous_high = highs[5]
+    bullish=0
+    bearish=0
 
-    last_low = lows[0]
-    previous_low = lows[5]
+    for i in range(4):
+        if highs[i] > highs[i+1]:
+            bullish += 1
+        else:
+            bearish += 1
 
-    if last_high > previous_high and last_low > previous_low:
+        if lows[i] > lows[i+1]:
+            bullish += 1
+        else:
+            bearish += 1
+
+    if bullish >= 6:
         return "Bullish 🟢"
 
-    if last_high < previous_high and last_low < previous_low:
+    if bearish >= 6:
         return "Bearish 🔴"
 
     return "Range 🟡"
