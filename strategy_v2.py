@@ -120,3 +120,17 @@ def detect_order_block_zone(candles):
             }
 
     return None
+
+
+def wait_for_retracement(order_block, current_price):
+
+    if order_block is None:
+        return False
+
+    high = order_block["high"]
+    low = order_block["low"]
+
+    if low <= current_price <= high:
+        return True
+
+    return False
