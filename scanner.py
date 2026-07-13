@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 
-from analysis import analyze_market
+from strategy_v2 import analyze_market
 
 
 PAIRS = [
@@ -28,7 +28,7 @@ async def start_scanner():
                     f"{result}"
                 )
 
-                if "BUY 🟢" in result or "SELL 🔴" in result:
+                if "Signal: BUY" in result or "Signal: SELL" in result:
                     print("🚨 SIGNAL FOUND")
 
             except Exception as e:
