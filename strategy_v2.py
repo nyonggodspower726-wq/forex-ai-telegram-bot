@@ -199,3 +199,29 @@ def detect_confirmation(candles):
         "signal": "WAIT",
         "type": "None"
     }
+
+
+def generate_signal(symbol):
+    candles_4h=get_candles(symbol,"4h")
+    trend_4h=detect_4h_trend(candles_4h)
+    if trend_4h=="No Trend":
+        return "WAIT ⏳\nNo 4H trend"
+    candles_1h=get_candles(symbol,"1h")
+    structure_1h=detect_1h_structure(candles_1h)
+    order_block=detect_order_block_zone(candles_1h)
+    if order_block is None:
+        return f"📊 PipsPilot AI\n\nSymbol: {symbol}\n\n4H Trend: {trend_4h}\n1H Structure: {structure_1h['structure']}\n1H Order Block: Not Found\n\nSignal: WAIT ⏳"
+    current_price=float(candles_1h[0]["close"])
+    if not wait_for_retracement(order_block,current_price):
+        return f"📊 PipsPilot AI\n\nSymbol: {symbol}\n\n4H Trend: {trend_4h}\n1H Structure: {structure_1h['structure']}\nOrder Block: {order_block['type']} OB\nPrice: Waiting for retracement ⏳\n\nSignal: WAIT"
+    candles_5m=get_candles(symbol,"5min")
+    confirmation=detect_confirmation(candles_5m)
+    if confirmation["confirmed"]:
+        return f"🚨 PipsPilot AI SIGNAL\n\nSymbol: {symbol}\n\n4H Trend: {trend_4h}\n1H Structure: {structure_1h['structure']}\nOrder Block: {order_block['type']} OB\nConfirmation: {confirmation['type']}\n\nSignal: {confirmation['signal']} ✅"
+    return f"📊 PipsPilot AI\n\nSymbol: {symbol}\n\n4H Trend: {trend_4h}\n1H Structure: {structure_1h['structure']}\nOrder Block: {order_block['type']} OB\n5M Confirmation: Waiting ⏳\n\nSignal: WAIT"
+
+def analyze_market(symbol):
+    try:
+        return generate_signal(symbol)
+    except Exception as e:
+        return f"📊 PipsPilot AI\n\nSymbol: {symbol}\nError: {e}"
