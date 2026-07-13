@@ -1,201 +1,74 @@
-import requests
+def generate_signal(symbol):
 
-API_KEY = "YOUR_API_KEY"
+    # 4H Trend
+    candles_4h = get_candles(symbol, "4h")
+    trend_4h = detect_4h_trend(candles_4h)
 
-
-def get_candles(symbol, interval):
-    url = (
-        f"https://api.twelvedata.com/time_series"
-        f"?symbol={symbol}"
-        f"&interval={interval}"
-        f"&outputsize=100"
-        f"&apikey={API_KEY}"
-    )
-
-    response = requests.get(url)
-    data = response.json()
-
-    return data.get("values", [])
+    if trend_4h == "No Trend":
+        return "WAIT ⏳\nNo 4H trend"
 
 
-def detect_4h_trend(candles):
-
-    if len(candles) < 20:
-        return "No Trend"
-
-    highs = [float(c["high"]) for c in candles[:20]]
-    lows = [float(c["low"]) for c in candles[:20]]
-
-    last_high = highs[0]
-    previous_high = highs[5]
-
-    last_low = lows[0]
-    previous_low = lows[5]
-
-    if last_high > previous_high and last_low > previous_low:
-        return "Bullish 🟢"
-
-    if last_high < previous_high and last_low < previous_low:
-        return "Bearish 🔴"
-
-    return "Range 🟡"
+    # 1H Structure
+    candles_1h = get_candles(symbol, "1h")
+    structure_1h = detect_1h_structure(candles_1h)
 
 
-def detect_1h_structure(candles):
-
-    if len(candles) < 20:
-        return {
-            "trend": "None",
-            "structure": "No Structure"
-        }
-
-    highs = [float(c["high"]) for c in candles[:20]]
-    lows = [float(c["low"]) for c in candles[:20]]
-
-    recent_high = highs[0]
-    previous_high = highs[5]
-
-    recent_low = lows[0]
-    previous_low = lows[5]
-
-    if recent_high > previous_high and recent_low > previous_low:
-        return {
-            "trend": "Bullish",
-            "structure": "HH → HL 🟢"
-        }
-
-    if recent_high < previous_high and recent_low < previous_low:
-        return {
-            "trend": "Bearish",
-            "structure": "LH → LL 🔴"
-        }
-
-    return {
-        "trend": "Range",
-        "structure": "Transition 🟡"
-    }
-
-
-def detect_order_block_zone(candles):
-
-    if len(candles) < 10:
-        return None
-
-    for i in range(2, len(candles) - 1):
-
-        current = candles[i - 1]
-        previous = candles[i]
-
-        current_open = float(current["open"])
-        current_close = float(current["close"])
-
-        previous_open = float(previous["open"])
-        previous_close = float(previous["close"])
-
-        previous_high = float(previous["high"])
-        previous_low = float(previous["low"])
-
-        # Bullish Order Block
-        if (
-            previous_close < previous_open
-            and current_close > current_open
-            and current_close > previous_open
-        ):
-            return {
-                "type": "Bullish",
-                "high": previous_high,
-                "low": previous_low
-            }
-
-        # Bearish Order Block
-        if (
-            previous_close > previous_open
-            and current_close < current_open
-            and current_close < previous_open
-        ):
-            return {
-                "type": "Bearish",
-                "high": previous_high,
-                "low": previous_low
-            }
-
-    return None
-
-
-def wait_for_retracement(order_block, current_price):
+    # 1H Order Block
+    order_block = detect_order_block_zone(candles_1h)
 
     if order_block is None:
-        return False
-
-    high = order_block["high"]
-    low = order_block["low"]
-
-    if low <= current_price <= high:
-        return True
-
-    return False
+        return (
+            f"📊 PipsPilot AI\n\n"
+            f"4H Trend: {trend_4h}\n"
+            f"1H Structure: {structure_1h['structure']}\n"
+            "1H Order Block: Not Found\n\n"
+            "Signal: WAIT ⏳"
+        )
 
 
-def detect_confirmation(candles):
+    # Current price
+    current_price = float(candles_1h[0]["close"])
 
-    if len(candles) < 2:
-        return {
-            "confirmed": False,
-            "signal": "WAIT",
-            "type": "None"
-        }
 
-    current = candles[0]
-    previous = candles[1]
+    # Retracement into Order Block
+    retracement = wait_for_retracement(
+        order_block,
+        current_price
+    )
 
-    current_open = float(current["open"])
-    current_close = float(current["close"])
+    if not retracement:
+        return (
+            f"📊 PipsPilot AI\n\n"
+            f"4H Trend: {trend_4h}\n"
+            f"1H Structure: {structure_1h['structure']}\n"
+            f"Order Block: {order_block['type']} OB\n"
+            "Price: Waiting for retracement ⏳"
+        )
 
-    previous_open = float(previous["open"])
-    previous_close = float(previous["close"])
 
-    # Bullish Engulfing
-    if (
-        previous_close < previous_open
-        and current_close > current_open
-        and current_close > previous_open
-    ):
-        return {
-            "confirmed": True,
-            "signal": "BUY",
-            "type": "Bullish Engulfing"
-        }
+    # 5M Confirmation
+    candles_5m = get_candles(symbol, "5min")
+    confirmation = detect_confirmation(candles_5m)
 
-    # Bearish Engulfing
-    if (
-        previous_close > previous_open
-        and current_close < current_open
-        and current_close < previous_open
-    ):
-        return {
-            "confirmed": True,
-            "signal": "SELL",
-            "type": "Bearish Engulfing"
-        }
 
-    # Bullish Overlap
-    if current_close > previous_close:
-        return {
-            "confirmed": True,
-            "signal": "BUY",
-            "type": "Bullish Overlap"
-        }
+    if confirmation["confirmed"]:
 
-    # Bearish Overlap
-    if current_close < previous_close:
-        return {
-            "confirmed": True,
-            "signal": "SELL",
-            "type": "Bearish Overlap"
-        }
+        return (
+            f"🚨 PipsPilot AI SIGNAL\n\n"
+            f"Symbol: {symbol}\n\n"
+            f"4H Trend: {trend_4h}\n"
+            f"1H Structure: {structure_1h['structure']}\n"
+            f"Order Block: {order_block['type']} OB\n"
+            f"Confirmation: {confirmation['type']}\n\n"
+            f"Signal: {confirmation['signal']} ✅"
+        )
 
-    return {
-        "confirmed": False,
-        "signal": "WAIT",
-        "type": "None"
-    }
+
+    return (
+        f"📊 PipsPilot AI\n\n"
+        f"4H Trend: {trend_4h}\n"
+        f"1H Structure: {structure_1h['structure']}\n"
+        f"Order Block: {order_block['type']} OB\n"
+        "5M Confirmation: Waiting ⏳\n\n"
+        "Signal: WAIT"
+    )
