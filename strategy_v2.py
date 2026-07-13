@@ -19,6 +19,7 @@ def generate_signal(symbol):
     if order_block is None:
         return (
             f"📊 PipsPilot AI\n\n"
+            f"Symbol: {symbol}\n\n"
             f"4H Trend: {trend_4h}\n"
             f"1H Structure: {structure_1h['structure']}\n"
             "1H Order Block: Not Found\n\n"
@@ -36,13 +37,16 @@ def generate_signal(symbol):
         current_price
     )
 
+
     if not retracement:
         return (
             f"📊 PipsPilot AI\n\n"
+            f"Symbol: {symbol}\n\n"
             f"4H Trend: {trend_4h}\n"
             f"1H Structure: {structure_1h['structure']}\n"
             f"Order Block: {order_block['type']} OB\n"
-            "Price: Waiting for retracement ⏳"
+            "Price: Waiting for retracement ⏳\n\n"
+            "Signal: WAIT"
         )
 
 
@@ -66,9 +70,23 @@ def generate_signal(symbol):
 
     return (
         f"📊 PipsPilot AI\n\n"
+        f"Symbol: {symbol}\n\n"
         f"4H Trend: {trend_4h}\n"
         f"1H Structure: {structure_1h['structure']}\n"
         f"Order Block: {order_block['type']} OB\n"
         "5M Confirmation: Waiting ⏳\n\n"
         "Signal: WAIT"
     )
+
+
+def analyze_market(symbol):
+
+    try:
+        return generate_signal(symbol)
+
+    except Exception as e:
+        return (
+            f"📊 PipsPilot AI\n\n"
+            f"Symbol: {symbol}\n"
+            f"Error: {str(e)}"
+        )
