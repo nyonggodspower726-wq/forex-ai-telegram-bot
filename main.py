@@ -6,7 +6,7 @@ import asyncio
 from strategy_v2 import analyze_market
 from scanner import start_scanner
 
-TOKEN = "YOUR_NEW_BOT_TOKEN"
+TOKEN = "8858152810:AAHrdYDVYc7yNWLFbTuWv1HGN5V22lTcU5w"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
