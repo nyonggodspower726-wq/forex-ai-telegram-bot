@@ -1,7 +1,15 @@
 import asyncio
 from datetime import datetime
 
+from telegram import Bot
+
 from strategy_v2 import analyze_market
+
+
+BOT_TOKEN = "YOUR_BOT_TOKEN"
+CHAT_ID = 6588451803
+
+bot = Bot(token=BOT_TOKEN)
 
 
 PAIRS = [
@@ -9,6 +17,9 @@ PAIRS = [
     "EURUSD",
     "GBPUSD"
 ]
+
+
+last_signals = {}
 
 
 async def start_scanner():
@@ -29,7 +40,21 @@ async def start_scanner():
                 )
 
                 if "Signal: BUY" in result or "Signal: SELL" in result:
-                    print("🚨 SIGNAL FOUND")
+
+                    # Prevent duplicate alerts
+                    if last_signals.get(pair) != result:
+
+                        await bot.send_message(
+                            chat_id=CHAT_ID,
+                            text=result
+                        )
+
+                        print("🚨 SIGNAL SENT TO TELEGRAM")
+
+                        last_signals[pair] = result
+
+                else:
+                    last_signals[pair] = None
 
             except Exception as e:
                 print(f"Scanner Error ({pair}): {e}")
