@@ -6,7 +6,7 @@ import asyncio
 from strategy_v2 import analyze_market
 from scanner import start_scanner
 
-TOKEN = "8858152810:AAGVLGsa9VunTglspZfvW1ivu-sCcghzxEI"
+TOKEN = "8858152810:AAHvj3T6g0lvVpNujS1gLFdlu313bVdueSo"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
