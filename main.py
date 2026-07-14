@@ -1,12 +1,14 @@
 from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
-
-import asyncio
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    ContextTypes,
+)
 
 from strategy_v2 import analyze_market
 from scanner import start_scanner
 
-TOKEN = "8858152810:AAHvj3T6g0lvVpNujS1gLFdlu313bVdueSo"
+TOKEN = "YOUR_BOT_TOKEN"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -38,7 +40,16 @@ async def analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def post_init(application: Application):
-    application.create_task(start_scanner(application.bot))
+
+    # Start the scanner in the background
+    import asyncio
+    asyncio.create_task(start_scanner(application.bot))
+
+    # Send startup notification
+    await application.bot.send_message(
+        chat_id=6588451803,
+        text="🚀 PipsPilot AI Scanner Started Successfully!\n\nNow monitoring:\n• XAUUSD\n• EURUSD\n• GBPUSD"
+    )
 
 
 def main():
