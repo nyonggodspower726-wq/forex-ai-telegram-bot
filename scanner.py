@@ -1,15 +1,7 @@
 import asyncio
 from datetime import datetime
 
-from telegram import Bot
-
 from strategy_v2 import analyze_market
-
-
-BOT_TOKEN = "8858152810:AAHvj3T6g0lvVpNujS1gLFdlu313bVdueSo"
-CHAT_ID = 6588451803
-
-bot = Bot(token=BOT_TOKEN)
 
 
 PAIRS = [
@@ -19,10 +11,12 @@ PAIRS = [
 ]
 
 
+CHAT_ID = 6588451803
+
 last_signals = {}
 
 
-async def start_scanner():
+async def start_scanner(bot):
 
     print("Market scanner started...")
 
@@ -41,7 +35,6 @@ async def start_scanner():
 
                 if "Signal: BUY" in result or "Signal: SELL" in result:
 
-                    # Prevent duplicate alerts
                     if last_signals.get(pair) != result:
 
                         await bot.send_message(
@@ -49,7 +42,7 @@ async def start_scanner():
                             text=result
                         )
 
-                        print("🚨 SIGNAL SENT TO TELEGRAM")
+                        print(f"🚨 Signal sent for {pair}")
 
                         last_signals[pair] = result
 
