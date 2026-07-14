@@ -6,7 +6,7 @@ from telegram import Bot
 from strategy_v2 import analyze_market
 
 
-BOT_TOKEN = "YOUR_BOT_TOKEN"
+BOT_TOKEN = "8858152810:AAGVLGsa9VunTglspZfvW1ivu-sCcghzxEI"
 CHAT_ID = 6588451803
 
 bot = Bot(token=BOT_TOKEN)
