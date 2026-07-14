@@ -6,7 +6,7 @@ import asyncio
 from strategy_v2 import analyze_market
 from scanner import start_scanner
 
-TOKEN = "8858152810:AAHvj3T6g0lvVpNujS1gLFdlu313bVdueSo"
+TOKEN = "YOUR_BOT_TOKEN"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -37,18 +37,23 @@ async def analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(result)
 
 
+async def post_init(application: Application):
+    application.create_task(start_scanner(application.bot))
+
+
 def main():
 
-    app = Application.builder().token(TOKEN).build()
+    app = (
+        Application.builder()
+        .token(TOKEN)
+        .post_init(post_init)
+        .build()
+    )
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("analysis", analysis))
 
     print("Bot is running...")
-
-    asyncio.get_event_loop().create_task(
-        start_scanner()
-    )
 
     app.run_polling()
 
