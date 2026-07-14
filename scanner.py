@@ -10,7 +10,6 @@ PAIRS = [
     "GBPUSD"
 ]
 
-
 CHAT_ID = 6588451803
 
 last_signals = {}
@@ -19,6 +18,22 @@ last_signals = {}
 async def start_scanner(bot):
 
     print("Market scanner started...")
+
+    # Give Telegram time to fully connect
+    await asyncio.sleep(5)
+
+    # Startup notification
+    await bot.send_message(
+        chat_id=CHAT_ID,
+        text=(
+            "🚀 PipsPilot AI Scanner Started\n\n"
+            "Monitoring:\n"
+            "• XAUUSD\n"
+            "• EURUSD\n"
+            "• GBPUSD\n\n"
+            "Waiting for BUY/SELL signals..."
+        )
+    )
 
     while True:
 
