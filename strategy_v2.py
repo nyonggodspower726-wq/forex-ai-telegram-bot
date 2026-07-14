@@ -1,6 +1,6 @@
 import requests
 
-API_KEY="YOUR_TWELVEDATA_API_KEY"
+API_KEY="aba787bf68ba4008b359f34229fdbc29"
 
 def get_candles(symbol,interval):
     url=f"https://api.twelvedata.com/time_series?symbol={symbol}&interval={interval}&outputsize=30&apikey={API_KEY}"
